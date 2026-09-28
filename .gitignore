@@ -1,0 +1,31 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local/runtime state
+.claude/settings.local.json
+.claude/harness/session-bootstrap.txt
+.playwright-cli/
+
+# Planning-with-files runtime artifacts
+task_plan.md
+findings.md
+progress.md
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node/Python artifacts if they appear later
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc

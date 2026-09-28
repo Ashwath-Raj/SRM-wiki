@@ -1,0 +1,81 @@
+{
+  "env": {
+    "OPENROUTER_FREE_MODE": "1",
+    "CLAUDE_CODE_MAX_RETRIES": "2",
+    "CLAUDE_CODE_EFFORT_LEVEL": "high",
+    "MAX_MCP_OUTPUT_TOKENS": "6000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75",
+    "ENABLE_PATTERN_RULES": "1",
+    "ENABLE_CODE_SECURITY_REVIEW": "0"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(npm test*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run typecheck*)",
+      "Bash(npx tsc*)",
+      "Bash(pytest*)",
+      "Bash(playwright-cli*)",
+      "Bash(npx playwright*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push origin main*)",
+      "Bash(git push origin master*)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(dropdb*)",
+      "Bash(terraform destroy*)",
+      "Bash(kubectl delete namespace*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-bootstrap.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pretool-free-guard.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/posttool-state.sh"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/precompact-state.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
