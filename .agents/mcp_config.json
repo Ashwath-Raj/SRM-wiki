@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "figma": {
+      "serverUrl": "https://mcp.figma.com/mcp"
+    },
+    "mobbin": {
+      "serverUrl": "https://api.mobbin.com/mcp"
+    },
+    "refero": {
+      "serverUrl": "https://api.refero.design/mcp"
+    },
+    "context7": {
+      "serverUrl": "https://mcp.context7.com/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
