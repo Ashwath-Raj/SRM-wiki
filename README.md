@@ -135,3 +135,4 @@ All 18 unit and integration tests verify:
 - **Source Provenance:** Every public record links back to its verified source URL and authority category (`OFFICIAL`, `DEPARTMENT`, `ORGANIZATION`, `STUDENT`, `COMMUNITY`, `EXTERNAL`).
 - **Privacy Assurance:** No private student data (grades, attendance, ERP passwords) is cataloged. Only public university resources and approved student works are indexed.
 - **Admin Verification:** Submissions and newly crawled content enter a review queue before being published to the primary search index.
+# srmwiki
