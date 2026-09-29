@@ -18,11 +18,8 @@ import {
   Code,
   Activity,
   CheckCircle2,
+  Clock,
   Compass,
-  MapPin,
-  Building2,
-  Navigation,
-  Layers,
 } from "lucide-react";
 import { Portal, EventItem, NoticeItem, ProjectItem, PulseData } from "@/types";
 import { PortalCard } from "@/components/portals/PortalCard";
@@ -292,48 +289,6 @@ export default function HomePage() {
             ))}
           </div>
         )}
-      </section>
-
-      {/* 4.5 INTERACTIVE CAMPUS MAP & FLOOR FINDER BANNER */}
-      <section className="wiki-container">
-        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 border border-blue-800/40 text-white shadow-2xl relative overflow-hidden group">
-          <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/20 transition-all duration-500" />
-          
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-3 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">
-                <Compass className="w-3.5 h-3.5 animate-spin-slow" />
-                <span>New Feature</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Interactive Campus Map & Floor Finder
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
-                Locate faculty cabins (e.g. Dr. Naga Sravanthi in Block A), seminar halls, X-Lab auditoriums, research labs, and get step-by-step walking directions across SRM University-AP.
-              </p>
-
-              {/* Quick block tags */}
-              <div className="flex flex-wrap gap-2 pt-1">
-                {["Academic Block A", "Block B", "Admin Block", "X-Lab Innovation", "Central Library", "Hostels"].map((bName) => (
-                  <span key={bName} className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 text-slate-200">
-                    {bName}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
-              <Link
-                href="/map"
-                className="px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 hover:scale-105 transition-all"
-              >
-                <Navigation className="w-4 h-4" />
-                <span>Explore Campus Map</span>
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Link>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* 5. LATEST NOTICES */}
