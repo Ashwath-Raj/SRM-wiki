@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Sparkles, Moon, Sun, Shield, Menu, X } from "lucide-react";
 import { SearchModal } from "../search/SearchModal";
+import { GoogleSignInButton } from "../auth/GoogleSignInButton";
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
@@ -126,6 +127,9 @@ export const Header: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Ask AI</span>
             </Link>
+
+            {/* Google Sign-in Button */}
+            <GoogleSignInButton />
 
             {/* Theme Toggle Button */}
             <button

@@ -45,6 +45,73 @@ class AIService:
     def __init__(self, db: Session):
         self.db = db
 
+    def _call_gemini(self, message: str, context_str: str) -> Optional[tuple[str, List[AISourceItem], List[str]]]:
+        """
+        Calls Google Gemini 2.5 Flash API with real-time Google Search grounding.
+        """
+        if not settings.GEMINI_API_KEY:
+            return None
+
+        import urllib.request
+        import json
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+        system_prompt = (
+            "You are the official SRM AP Wiki AI Discovery Assistant for SRM University-AP (Amaravati, Andhra Pradesh). "
+            "Always ground your responses strictly in verified university facts, academic regulations, official portals, and live campus events. "
+            "If asked about events happening today, hackathons, or workshops, provide exact dates, timings, venues (e.g. X-Lab Auditorium), faculty mentors, organizers (e.g. GDG on Campus, Next Tech Lab), and official links. "
+            f"Verified Campus Context:\n{context_str}"
+        )
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": f"{system_prompt}\n\nUser Question: {message}"}
+                    ]
+                }
+            ],
+            "tools": [{"google_search": {}}],
+        }
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    candidate = data.get("candidates", [{}])[0]
+                    parts = candidate.get("content", {}).get("parts", [])
+                    answer_text = "".join([p.get("text", "") for p in parts if "text" in p])
+                    
+                    # Extract grounding metadata citations if returned
+                    grounding_sources = []
+                    metadata = candidate.get("groundingMetadata", {})
+                    for chunk in metadata.get("groundingChunks", []):
+                        web = chunk.get("web", {})
+                        if web.get("uri"):
+                            grounding_sources.append(
+                                AISourceItem(
+                                    title=web.get("title", "Google Grounding Citation"),
+                                    url=web.get("uri"),
+                                    source_type="EXTERNAL",
+                                    snippet=web.get("title", ""),
+                                )
+                            )
+
+                    followups = [
+                        "Tell me about ongoing hackathons",
+                        "Where can I find the examination portal?",
+                        "What is the attendance rule?",
+                    ]
+                    if answer_text:
+                        return answer_text, grounding_sources, followups
+        except Exception as e:
+            # Fallback smoothly to deterministic verified DB grounding
+            pass
+        return None
+
     def chat(self, request: AIChatRequest) -> AIChatResponse:
         user_msg = request.message.strip()
         intent = IntentRouter.classify_intent(user_msg)
@@ -52,7 +119,18 @@ class AIService:
         followups: List[str] = []
         answer = ""
 
-        # Routing logic grounded in verified database information
+        # 1. Try Gemini API with live Google search grounding if configured
+        gemini_res = self._call_gemini(user_msg, "SRM University-AP campus knowledge base")
+        if gemini_res:
+            answer, sources, followups = gemini_res
+            return AIChatResponse(
+                answer=answer,
+                intent=intent,
+                sources=sources,
+                suggested_followups=followups,
+            )
+
+        # 2. Routing logic grounded in verified database information
         if intent == "PORTAL_LOOKUP":
             answer, sources, followups = self._handle_portal_lookup(user_msg)
         elif intent == "EVENT_SEARCH":
@@ -133,39 +211,109 @@ class AIService:
 
     def _handle_event_search(self, msg: str) -> tuple[str, List[AISourceItem], List[str]]:
         now = datetime.utcnow()
-        events = self.db.query(Event).filter(Event.verification_status == "VERIFIED").order_by(Event.start_time.asc()).all()
+        msg_lower = msg.lower()
+        terms = [t for t in re.split(r"\W+", msg_lower) if len(t) > 2]
+        events = self.db.query(Event).filter(Event.verification_status == "VERIFIED").all()
         
+        # Check for specific event match first
+        scored_events = []
+        for e in events:
+            score = 0
+            e_text = f"{e.title} {e.description or ''} {e.organizer or ''} {e.venue or ''} {e.category}".lower()
+            for t in terms:
+                if t in e_text:
+                    score += 10
+            # Boost if exact phrase in title or organizer
+            if any(phrase in e_text for phrase in ["google solution hunt", "gdg", "solution hunt", "deepseek", "quantum"]):
+                for phrase in ["google solution hunt", "gdg", "solution hunt", "deepseek", "quantum"]:
+                    if phrase in msg_lower and phrase in e_text:
+                        score += 50
+            if score > 0:
+                scored_events.append((e, score))
+
+        scored_events.sort(key=lambda x: x[1], reverse=True)
+
+        # If a specific event has a high match
+        if scored_events and scored_events[0][1] >= 20:
+            top_event = scored_events[0][0]
+            is_live_now = top_event.status == "LIVE NOW" or (top_event.start_time <= now <= top_event.end_time)
+            status_badge = "🔴 **LIVE NOW ON CAMPUS**" if is_live_now else f"**Status:** {top_event.status}"
+            time_str = f"{top_event.start_time.strftime('%d %B %Y')}, {top_event.start_time.strftime('%I:%M %p')} – {top_event.end_time.strftime('%I:%M %p') if top_event.end_time else 'Evening'} IST"
+            
+            lines = [
+                f"### {top_event.title}",
+                f"{status_badge}\n",
+                f"{top_event.description}\n",
+                f"**Key Event Details:**",
+                f"• 📍 **Live Venue:** {top_event.venue or 'SRM University-AP Campus'}",
+                f"• ⏰ **Timing:** {time_str}",
+                f"• 👥 **Organized By:** {top_event.organizer or 'Campus Student Chapter'}",
+                f"• 🏷️ **Category:** {top_event.category}",
+            ]
+            if top_event.registration_url:
+                lines.append(f"• 🔗 **Official Registration / Details:** [{top_event.registration_url}]({top_event.registration_url})")
+            if top_event.source_url:
+                lines.append(f"• 📢 **Official Announcement Source:** [{top_event.source_url}]({top_event.source_url})")
+
+            answer = "\n".join(lines)
+            sources = [
+                AISourceItem(
+                    title=top_event.title,
+                    url=f"/events/{top_event.slug}",
+                    source_type=top_event.source_type,
+                    snippet=top_event.description,
+                )
+            ]
+            if top_event.source_url:
+                sources.append(
+                    AISourceItem(
+                        title=f"{top_event.organizer} Announcement",
+                        url=top_event.source_url,
+                        source_type=top_event.source_type,
+                        snippet=f"Live updates for {top_event.title}",
+                    )
+                )
+
+            followups = [
+                "Where is the X-Lab Auditorium located?",
+                "What other hackathons are coming up?",
+                "View GDG on Campus student club profile",
+            ]
+            return answer, sources, followups
+
+        # Otherwise general event listing / today's events
+        is_today = any(w in msg_lower for w in ["today", "rn", "right now", "happening", "live", "current"])
         relevant_events = []
-        is_today = "today" in msg.lower()
         for e in events:
             if is_today:
-                if e.start_time.date() == now.date():
+                if e.start_time.date() == now.date() or e.status == "LIVE NOW":
                     relevant_events.append(e)
             else:
-                if e.start_time >= now:
+                if e.start_time >= now or e.status == "LIVE NOW":
                     relevant_events.append(e)
 
         if not relevant_events and events:
-            relevant_events = events[:3]
+            relevant_events = events[:4]
 
         if relevant_events:
             lines = []
             sources = []
-            for ev in relevant_events[:4]:
+            for ev in relevant_events:
                 time_str = ev.start_time.strftime("%d %b %Y at %I:%M %p")
-                reg_link = f" · [Registration Link]({ev.registration_url})" if ev.registration_url else ""
-                lines.append(f"• **{ev.title}** ({time_str} at {ev.venue or 'Campus'}) — Organized by {ev.organizer or 'University'}{reg_link}")
+                live_indicator = "🔴 [LIVE NOW] " if (ev.status == "LIVE NOW" or ev.start_time.date() == now.date()) else ""
+                reg_link = f" · [Details]({ev.registration_url or f'/events/{ev.slug}'})"
+                lines.append(f"• {live_indicator}**{ev.title}** ({time_str} at {ev.venue or 'Campus'}) — Organized by {ev.organizer or 'University'}{reg_link}")
                 sources.append(
                     AISourceItem(
                         title=ev.title,
                         url=f"/events/{ev.slug}",
                         source_type=ev.source_type,
-                        snippet=f"Event on {time_str} at {ev.venue}",
+                        snippet=f"{ev.description[:120]}... ({time_str} at {ev.venue})",
                     )
                 )
-            heading = "Here are the events happening today:" if is_today else "Here are upcoming verified events at SRM University-AP:"
+            heading = "Here are the live and scheduled events on campus today:" if is_today else "Here are verified campus events at SRM University-AP:"
             answer = f"{heading}\n\n" + "\n".join(lines)
-            followups = ["Show AI and technical workshops", "How do I register for events?", "View complete events calendar"]
+            followups = ["Tell me about the Google Solution Hunt Challenge", "Show upcoming hackathons", "View all events"]
             return answer, sources, followups
         else:
             answer = "There are no currently scheduled public events found matching that criteria."

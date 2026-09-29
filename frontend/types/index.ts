@@ -34,7 +34,7 @@ export interface EventItem {
   source_type: SourceType;
   source_url?: string;
   verification_status: VerificationStatus;
-  status: "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELLED" | "ARCHIVED";
+  status: "UPCOMING" | "ONGOING" | "LIVE NOW" | "COMPLETED" | "CANCELLED" | "ARCHIVED" | string;
   created_at: string;
   updated_at: string;
 }

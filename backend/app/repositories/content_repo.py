@@ -68,12 +68,24 @@ class ContentRepository:
             query = query.filter(Event.status == status.upper())
 
         if today_only:
-            # Events whose date matches today (or within 24h)
+            # Events whose date matches today or currently LIVE NOW
             today_start = datetime(now.year, now.month, now.day)
             today_end = datetime(now.year, now.month, now.day, 23, 59, 59)
-            query = query.filter(Event.start_time >= today_start, Event.start_time <= today_end)
+            query = query.filter(
+                or_(
+                    Event.status == "LIVE NOW",
+                    Event.status == "ONGOING",
+                    (Event.start_time >= today_start) & (Event.start_time <= today_end),
+                )
+            )
         elif upcoming_only:
-            query = query.filter(Event.start_time >= now)
+            query = query.filter(
+                or_(
+                    Event.start_time >= now,
+                    Event.status == "LIVE NOW",
+                    Event.status == "ONGOING",
+                )
+            )
 
         return query.order_by(Event.start_time.asc()).offset(skip).limit(limit).all()
 

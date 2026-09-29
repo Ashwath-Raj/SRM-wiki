@@ -1,5 +1,6 @@
 from typing import Dict, Any
 from datetime import datetime, timedelta
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from backend.app.models.all_models import (
     Portal,
@@ -40,13 +41,16 @@ class PulseService:
             .all()
         )
 
-        # 2. Today's Events
+        # 2. Today's Events & Live Now
         today_events = (
             self.db.query(Event)
             .filter(
                 Event.verification_status == "VERIFIED",
-                Event.start_time >= today_start,
-                Event.start_time <= today_end,
+                or_(
+                    Event.status == "LIVE NOW",
+                    Event.status == "ONGOING",
+                    (Event.start_time >= today_start) & (Event.start_time <= today_end),
+                ),
             )
             .order_by(Event.start_time.asc())
             .all()

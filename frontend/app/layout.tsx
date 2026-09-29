@@ -16,6 +16,8 @@ export const viewport = {
   maximumScale: 5,
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,10 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white">
-        <Header />
-        <main className="flex-1 w-full pb-16 md:pb-0">{children}</main>
-        <Footer />
-        <MobileNav />
+        <AuthProvider>
+          <Header />
+          <main className="flex-1 w-full pb-16 md:pb-0">{children}</main>
+          <Footer />
+          <MobileNav />
+        </AuthProvider>
       </body>
     </html>
   );

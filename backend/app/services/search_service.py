@@ -106,14 +106,18 @@ class SearchService:
             for e in events:
                 if source_type and e.source_type.upper() != source_type.upper():
                     continue
-                score = calc_score(e.title, e.description or "", e.source_type)
+                combined_text = f"{e.description or ''} {e.organizer or ''} {e.venue or ''} {e.category or ''}"
+                score = calc_score(e.title, combined_text, e.source_type)
+                if e.status == "LIVE NOW" or e.status == "ONGOING":
+                    score += 25.0
                 if not q or score > 1.0:
+                    badge_name = "🔴 Live Event" if e.status == "LIVE NOW" else "Event"
                     results.append(
                         SearchResultItem(
                             id=e.id,
                             type="event",
                             title=e.title,
-                            description=e.description,
+                            description=f"[{e.organizer or 'Campus'}] {e.description}",
                             url=f"/events/{e.slug}",
                             source_url=e.source_url or e.registration_url,
                             source_type=e.source_type,
@@ -121,7 +125,7 @@ class SearchService:
                             date=e.start_time.strftime("%d %b %Y, %I:%M %p"),
                             status=e.status,
                             match_score=score,
-                            badge="Event",
+                            badge=badge_name,
                         )
                     )
                     grouped_counts["events"] += 1

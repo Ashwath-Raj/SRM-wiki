@@ -87,34 +87,37 @@ export default function HomePage() {
   return (
     <div className="space-y-12 py-6 sm:py-10">
       {/* 1. HERO SECTION */}
-      <section className="wiki-container text-center pt-4 pb-8 sm:pt-8 sm:pb-12">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 mb-4 animate-fade-in">
-          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-          <span>Official SRM University-AP Digital Ecosystem</span>
+      <section className="wiki-container text-center pt-4 pb-8 sm:pt-10 sm:pb-14">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50/80 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-xs font-bold text-blue-700 dark:text-blue-300 mb-5 shadow-xs">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-blue-400" />
+          </span>
+          <span>Verified SRM University-AP Knowledge Base</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-3 sm:mb-4">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-slate-50 mb-3 sm:mb-4 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-slate-100 dark:to-slate-400 bg-clip-text text-transparent">
           SRM AP Wiki
         </h1>
 
-        <p className="text-base sm:text-xl font-normal text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
+        <p className="text-base sm:text-xl font-medium text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8 leading-relaxed">
           Everything SRM AP, in one place.
         </p>
 
         {/* Global Search Bar */}
-        <div className="max-w-2xl mx-auto mb-5">
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+        <div className="max-w-2xl mx-auto mb-6">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center group">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search portals, exams, notices, events, projects, regulations..."
-              className="w-full h-13 sm:h-14 pl-12 pr-28 text-sm sm:text-base rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-sm focus:border-blue-600 dark:focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400"
+              className="w-full h-14 sm:h-15 pl-13 pr-30 text-sm sm:text-base rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 border-slate-200/80 dark:border-slate-800/80 shadow-md shadow-slate-200/50 dark:shadow-slate-950/50 focus:border-blue-600 dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all placeholder:text-slate-400 text-slate-900 dark:text-slate-100 font-medium"
             />
-            <Search className="absolute left-4 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4.5 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
             <button
               type="submit"
-              className="absolute right-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm transition-colors shadow-sm"
+              className="absolute right-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-blue-500/20 active:scale-95"
             >
               Search
             </button>
@@ -122,13 +125,13 @@ export default function HomePage() {
         </div>
 
         {/* Popular Keyword Chips */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-          <span className="font-semibold text-slate-700 dark:text-slate-300 mr-1">Popular:</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span className="font-bold text-slate-700 dark:text-slate-300 mr-1">Popular:</span>
           {popularKeywords.map((item) => (
             <button
               key={item.label}
               onClick={() => router.push(`/search?q=${encodeURIComponent(item.q)}`)}
-              className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+              className="px-3 py-1 rounded-full bg-slate-100/90 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 dark:bg-slate-800/80 dark:hover:bg-blue-950/60 dark:hover:text-blue-300 border border-slate-200/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 transition-all font-medium"
             >
               {item.label}
             </button>
@@ -187,47 +190,55 @@ export default function HomePage() {
       {/* 3. SRM AP PULSE SUMMARY BANNER */}
       {pulseData && (
         <section className="wiki-container">
-          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-blue-900 to-indigo-950 text-white shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
+          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-950 text-white shadow-xl border border-blue-800/40 relative overflow-hidden">
+            {/* Ambient background blur */}
+            <div className="absolute top-0 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  </span>
+                  <span className="text-xs font-black uppercase tracking-widest text-emerald-300">
                     Live Campus Pulse
                   </span>
                 </div>
-                <h3 className="font-bold text-lg text-white">What&apos;s happening at SRM AP right now</h3>
-                <p className="text-xs text-slate-300 max-w-xl">
-                  Real-time aggregation of today&apos;s lectures, urgent examination circulars, and impending project deadlines.
+                <h3 className="font-extrabold text-lg sm:text-xl text-white tracking-tight">
+                  What&apos;s happening at SRM AP right now
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-normal leading-relaxed">
+                  Real-time aggregation of today&apos;s hackathons, live workshops, urgent circulars, and deadlines.
                 </p>
               </div>
 
               {/* Stat Chips */}
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                 <Link
                   href="/notices"
-                  className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 flex flex-col items-center transition-colors"
+                  className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 flex flex-col items-center transition-all hover:scale-105 shadow-sm"
                 >
-                  <span className="text-lg font-extrabold">{pulseData.counts.notices || 5}</span>
-                  <span className="text-[10px] text-slate-300 uppercase tracking-wide">Notices</span>
+                  <span className="text-xl font-black text-white">{pulseData.counts.notices || 5}</span>
+                  <span className="text-[10px] text-slate-300 uppercase tracking-widest font-semibold">Notices</span>
                 </Link>
                 <Link
                   href="/events"
-                  className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 flex flex-col items-center transition-colors"
+                  className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 flex flex-col items-center transition-all hover:scale-105 shadow-sm"
                 >
-                  <span className="text-lg font-extrabold">{pulseData.counts.today_events || 2}</span>
-                  <span className="text-[10px] text-slate-300 uppercase tracking-wide">Today</span>
+                  <span className="text-xl font-black text-emerald-300">{pulseData.counts.today_events || 2}</span>
+                  <span className="text-[10px] text-slate-300 uppercase tracking-widest font-semibold">Today</span>
                 </Link>
                 <Link
                   href="/opportunities"
-                  className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 flex flex-col items-center transition-colors"
+                  className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 flex flex-col items-center transition-all hover:scale-105 shadow-sm"
                 >
-                  <span className="text-lg font-extrabold">{pulseData.counts.deadlines || 3}</span>
-                  <span className="text-[10px] text-slate-300 uppercase tracking-wide">Deadlines</span>
+                  <span className="text-xl font-black text-amber-300">{pulseData.counts.deadlines || 3}</span>
+                  <span className="text-[10px] text-slate-300 uppercase tracking-widest font-semibold">Deadlines</span>
                 </Link>
                 <Link
                   href="/pulse"
-                  className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm ml-1"
+                  className="px-4.5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-md shadow-blue-500/30 hover:scale-102 ml-1"
                 >
                   <span>Open Pulse</span>
                   <ArrowRight className="w-3.5 h-3.5" />

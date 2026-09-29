@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
 
+    # Google OAuth Configuration
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+
     # Crawler Configuration
     CRAWLER_USER_AGENT: str = "SRMAPWikiBot/1.0 (+https://wiki.srmap.edu.in/bot)"
     CRAWLER_RATE_LIMIT_DELAY: float = 1.0
