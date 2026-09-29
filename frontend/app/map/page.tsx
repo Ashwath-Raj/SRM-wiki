@@ -3,38 +3,46 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
-  MapPin,
   Compass,
   Search,
-  Layers,
   Building as BuildingIcon,
   Navigation,
   User,
   Mail,
   Clock,
-  ArrowRight,
   Sparkles,
   CheckCircle2,
   Copy,
   Info,
-  ChevronRight,
-  Maximize2
+  Layers,
+  MapPin,
+  Utensils,
+  Trophy,
+  HeartPulse,
+  Package,
+  ShieldAlert,
+  HelpCircle,
+  ExternalLink
 } from "lucide-react";
 import {
   CAMPUS_BUILDINGS,
+  CAMPUS_LANDMARKS,
   ALL_ROOMS,
   CATEGORY_LABELS,
   Building,
-  RoomLocation
+  RoomLocation,
+  Landmark
 } from "@/data/campusMapData";
 
 export default function CampusMapPage() {
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string>("block-a");
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string>("cv-raman-block");
   const [selectedFloor, setSelectedFloor] = useState<number | "all">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeRoom, setActiveRoom] = useState<RoomLocation | null>(null);
+  const [activeLandmark, setActiveLandmark] = useState<Landmark | null>(null);
   const [copiedDirection, setCopiedDirection] = useState(false);
+  const [zoneFilter, setZoneFilter] = useState<"all" | "academic" | "hostels" | "dining" | "sports">("all");
 
   const selectedBuilding = useMemo(() => {
     return CAMPUS_BUILDINGS.find((b) => b.id === selectedBuildingId) || CAMPUS_BUILDINGS[0];
@@ -43,7 +51,6 @@ export default function CampusMapPage() {
   // Filtered rooms based on search, building, floor, and category
   const filteredRooms = useMemo(() => {
     return ALL_ROOMS.filter((room) => {
-      // If user is searching globally, don't restrict strictly to building unless they cleared search
       const matchesSearch =
         searchQuery.trim() === "" ||
         room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -60,6 +67,24 @@ export default function CampusMapPage() {
     });
   }, [selectedBuildingId, selectedFloor, searchQuery, selectedCategory]);
 
+  // Visible buildings based on zone filter
+  const visibleBuildings = useMemo(() => {
+    if (zoneFilter === "all") return CAMPUS_BUILDINGS;
+    if (zoneFilter === "academic") {
+      return CAMPUS_BUILDINGS.filter(b => ["cv-raman-block", "sr-block", "x-lab", "jc-bose-block", "vikram-sarabhai-block"].includes(b.id));
+    }
+    if (zoneFilter === "hostels") {
+      return CAMPUS_BUILDINGS.filter(b => ["ganga-hostel", "yamuna-hostel"].includes(b.id));
+    }
+    if (zoneFilter === "dining") {
+      return CAMPUS_BUILDINGS.filter(b => ["annapurna-mess", "food-court"].includes(b.id));
+    }
+    if (zoneFilter === "sports") {
+      return CAMPUS_BUILDINGS.filter(b => b.id === "sports-complex");
+    }
+    return CAMPUS_BUILDINGS;
+  }, [zoneFilter]);
+
   const handleCopyDirections = (directions: string) => {
     navigator.clipboard.writeText(directions);
     setCopiedDirection(true);
@@ -67,47 +92,50 @@ export default function CampusMapPage() {
   };
 
   const quickPicks = [
-    { label: "GDG Hackathon (X-Lab)", query: "X-Lab Main Auditorium" },
-    { label: "Dr. Sravanthi (Cabin A-108)", query: "Dr. Naga Sravanthi" },
-    { label: "ALC Seminar Hall", query: "ALC Seminar Hall" },
-    { label: "Student Affairs (DSA)", query: "Directorate of Student Affairs" },
-    { label: "24/7 Health Clinic", query: "Health Center" },
+    { label: "Dr. Sravanthi (Cabin 312)", query: "Dr. Naga Sravanthi" },
+    { label: "HoD CSE Dr. Sobin", query: "Dr. Sobin" },
+    { label: "X-Lab Hackathon Arena", query: "X-Arena" },
+    { label: "ALC-1 Active Learning", query: "ALC-1" },
+    { label: "Central Library", query: "Central Library" },
+    { label: "24/7 Health Clinic", query: "Health Clinic" },
+    { label: "Annapurna Mess", query: "Annapurna Mess" },
+    { label: "Courier Point", query: "Courier" }
   ];
 
   return (
-    <div className="min-h-screen pb-20 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen pb-24 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
       {/* Top Banner Header */}
       <div className="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md">
         <div className="wiki-container py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 mb-2">
-                <Compass className="w-3.5 h-3.5 animate-spin-slow" />
-                <span>Interactive Campus Navigator</span>
+                <Compass className="w-3.5 h-3.5 text-blue-600 animate-spin-slow" />
+                <span>Verified Campus Master Plan • Amaravati</span>
               </div>
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-                SRM AP Campus Map & Floor Finder
+                SRM University-AP Campus Map & Navigator
               </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-                Explore campus blocks, search faculty cabins, research labs, lecture halls, and get instant step-by-step walking directions.
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                Architectural layout of SRM AP (Neerukonda). Explore CV Raman Block, SR Block, X-Lab, Annapurna Mess, Hostels, and locate faculty cabins with step-by-step directions.
               </p>
             </div>
 
             {/* Global Search Bar */}
-            <div className="w-full md:w-80">
+            <div className="w-full md:w-88">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search faculty, cabin, lab, hall..."
+                  placeholder="Search faculty cabin, ALC, lab, room..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  className="w-full pl-10 pr-12 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-semibold"
                   >
                     Clear
                   </button>
@@ -118,7 +146,7 @@ export default function CampusMapPage() {
 
           {/* Quick Find Tags */}
           <div className="flex items-center gap-2 mt-4 flex-wrap">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Quick Jump:</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Popular Destinations:</span>
             {quickPicks.map((pick) => (
               <button
                 key={pick.label}
@@ -134,55 +162,170 @@ export default function CampusMapPage() {
       </div>
 
       <div className="wiki-container mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Interactive Vector 2D Campus Map & Building Selector */}
+        {/* Left Column: Interactive Vector Architectural Campus Map */}
         <div className="lg:col-span-7 space-y-6">
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <BuildingIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <h2 className="font-bold text-sm tracking-tight text-slate-900 dark:text-slate-100">
-                  Campus Layout & Zones
+                  Campus Layout & Vector Survey
                 </h2>
               </div>
-              <span className="text-xs text-slate-400 flex items-center gap-1">
-                <Info className="w-3.5 h-3.5" /> Click any building to inspect
-              </span>
+
+              {/* Zone Filter Chips */}
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs overflow-x-auto">
+                <button
+                  onClick={() => setZoneFilter("all")}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                    zoneFilter === "all"
+                      ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setZoneFilter("academic")}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                    zoneFilter === "academic"
+                      ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  Academic
+                </button>
+                <button
+                  onClick={() => setZoneFilter("hostels")}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                    zoneFilter === "hostels"
+                      ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  Hostels
+                </button>
+                <button
+                  onClick={() => setZoneFilter("dining")}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                    zoneFilter === "dining"
+                      ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  Dining
+                </button>
+                <button
+                  onClick={() => setZoneFilter("sports")}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                    zoneFilter === "sports"
+                      ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  Sports
+                </button>
+              </div>
             </div>
 
-            {/* Interactive SVG Campus Canvas */}
-            <div className="relative w-full aspect-[16/10] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-inner group">
-              <svg viewBox="0 0 1050 480" className="w-full h-full select-none">
-                {/* Background Grid & Walkways */}
+            {/* Interactive Real SVG Campus Blueprint */}
+            <div className="relative w-full aspect-[10/12] bg-[#0c121e] rounded-xl overflow-hidden border border-slate-800 shadow-2xl select-none">
+              <svg viewBox="0 0 1000 1200" className="w-full h-full">
+                {/* SVG Blueprint Grid */}
                 <defs>
-                  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" strokeWidth="0.5" />
+                  <pattern id="campusGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" strokeWidth="0.5" opacity="0.4" />
                   </pattern>
-                  <linearGradient id="mainRoad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#334155" />
-                    <stop offset="100%" stopColor="#1e293b" />
-                  </linearGradient>
+                  <radialGradient id="campusGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#0c121e" stopOpacity="0" />
+                  </radialGradient>
                 </defs>
-                <rect width="1050" height="480" fill="#090d16" />
-                <rect width="1050" height="480" fill="url(#grid)" opacity="0.6" />
 
-                {/* Campus Main Walkways / Avenues */}
-                <path d="M 50 230 L 1000 230" stroke="#334155" strokeWidth="22" strokeLinecap="round" opacity="0.7" />
-                <path d="M 390 50 L 390 420" stroke="#334155" strokeWidth="18" strokeLinecap="round" opacity="0.7" />
-                <path d="M 620 50 L 620 420" stroke="#334155" strokeWidth="18" strokeLinecap="round" opacity="0.7" />
-                <path d="M 840 50 L 840 420" stroke="#334155" strokeWidth="16" strokeLinecap="round" opacity="0.7" />
+                <rect width="1000" height="1200" fill="#090d16" />
+                <rect width="1000" height="1200" fill="url(#campusGrid)" />
+                <rect width="1000" height="1200" fill="url(#campusGlow)" />
 
-                {/* Entry Gate Indicator */}
-                <g transform="translate(30, 215)">
-                  <rect width="50" height="30" rx="6" fill="#2563EB" opacity="0.8" />
-                  <text x="25" y="19" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle">
-                    GATE 1
+                {/* Main Campus Internal Roadways & Avenues */}
+                {/* North-South Central Spine */}
+                <path
+                  d="M 500 50 L 500 1150"
+                  stroke="#1e293b"
+                  strokeWidth="24"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 500 50 L 500 1150"
+                  stroke="#334155"
+                  strokeWidth="2"
+                  strokeDasharray="8 8"
+                />
+
+                {/* East-West Cross Link towards Gate 3 */}
+                <path
+                  d="M 420 420 L 920 420"
+                  stroke="#1e293b"
+                  strokeWidth="20"
+                  strokeLinecap="round"
+                />
+
+                {/* Southern Spine to CV Raman & Sports */}
+                <path
+                  d="M 150 820 L 700 820"
+                  stroke="#1e293b"
+                  strokeWidth="20"
+                  strokeLinecap="round"
+                />
+
+                {/* Gate 3 Security Entrance Marker */}
+                <g transform="translate(890, 400)">
+                  <rect width="40" height="30" rx="6" fill="#2563EB" opacity="0.9" />
+                  <text x="20" y="19" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
+                    GATE 3
                   </text>
                 </g>
 
-                {/* Campus Buildings SVG Render */}
+                {/* Exit Gate Marker */}
+                <g transform="translate(860, 1145)">
+                  <rect width="50" height="24" rx="6" fill="#475569" opacity="0.9" />
+                  <text x="25" y="16" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
+                    EXIT GATE
+                  </text>
+                </g>
+
+                {/* Campus Landmarks (Fountain, Plazas, Courts) */}
+                {CAMPUS_LANDMARKS.map((lm) => (
+                  <g
+                    key={lm.id}
+                    onClick={() => setActiveLandmark(lm)}
+                    className="cursor-pointer group/lm transition-all"
+                  >
+                    <path
+                      d={lm.path}
+                      fill={lm.color}
+                      opacity={activeLandmark?.id === lm.id ? 0.9 : 0.45}
+                      stroke={lm.color}
+                      strokeWidth="1.5"
+                      className="transition-all hover:opacity-80"
+                    />
+                    <circle cx={lm.cx} cy={lm.cy} r="3" fill="#ffffff" opacity="0.8" />
+                    <text
+                      x={lm.cx}
+                      y={lm.cy - 8}
+                      fill="#94a3b8"
+                      fontSize="9"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      className="pointer-events-none drop-shadow"
+                    >
+                      {lm.name}
+                    </text>
+                  </g>
+                ))}
+
+                {/* Campus Real Surveyed Buildings */}
                 {CAMPUS_BUILDINGS.map((building) => {
                   const isSelected = selectedBuildingId === building.id;
-                  const { x, y, width, height } = building.coordinates;
 
                   return (
                     <g
@@ -190,82 +333,55 @@ export default function CampusMapPage() {
                       onClick={() => {
                         setSelectedBuildingId(building.id);
                         setSelectedFloor("all");
+                        setActiveLandmark(null);
                       }}
-                      className="cursor-pointer transition-all duration-300"
+                      className="cursor-pointer group/bldg transition-all"
                     >
                       {/* Selection Glow Pulse */}
                       {isSelected && (
-                        <rect
-                          x={x - 6}
-                          y={y - 6}
-                          width={width + 12}
-                          height={height + 12}
-                          rx="14"
+                        <path
+                          d={building.path}
                           fill="none"
                           stroke={building.color}
-                          strokeWidth="3"
-                          strokeDasharray="6 4"
+                          strokeWidth="8"
+                          strokeOpacity="0.4"
                           className="animate-pulse"
                         />
                       )}
 
-                      {/* Main Building Body */}
-                      <rect
-                        x={x}
-                        y={y}
-                        width={width}
-                        height={height}
-                        rx="10"
+                      {/* Actual Architectural Building Polygon */}
+                      <path
+                        d={building.path}
                         fill={isSelected ? building.color : "#1e293b"}
+                        fillOpacity={isSelected ? 0.95 : 0.8}
                         stroke={building.color}
-                        strokeWidth={isSelected ? "2.5" : "1.5"}
-                        opacity={isSelected ? 0.95 : 0.8}
-                        className="transition-all hover:opacity-100"
+                        strokeWidth={isSelected ? "3" : "1.8"}
+                        className="transition-all hover:fill-opacity-100"
                       />
 
-                      {/* Building Name & Label */}
+                      {/* Building Name Tag */}
                       <text
-                        x={x + width / 2}
-                        y={y + height / 2 - 8}
+                        x={building.cx}
+                        y={building.cy - 4}
                         fill="#ffffff"
-                        fontSize="13"
+                        fontSize="12"
                         fontWeight="bold"
                         textAnchor="middle"
-                        className="pointer-events-none drop-shadow-md"
+                        className="pointer-events-none drop-shadow-md tracking-tight"
                       >
                         {building.name}
                       </text>
 
+                      {/* Subtitle / Floor Count */}
                       <text
-                        x={x + width / 2}
-                        y={y + height / 2 + 10}
+                        x={building.cx}
+                        y={building.cy + 12}
                         fill={isSelected ? "#ffffff" : "#94a3b8"}
-                        fontSize="10"
+                        fontSize="9.5"
                         textAnchor="middle"
-                        className="pointer-events-none"
+                        className="pointer-events-none font-medium"
                       >
-                        {building.totalFloors} Floors • {building.rooms.length} Key Rooms
-                      </text>
-
-                      {/* Mini Floor Count Tag */}
-                      <rect
-                        x={x + width - 36}
-                        y={y + 6}
-                        width="30"
-                        height="16"
-                        rx="4"
-                        fill="#000000"
-                        opacity="0.4"
-                      />
-                      <text
-                        x={x + width - 21}
-                        y={y + 18}
-                        fill="#ffffff"
-                        fontSize="9"
-                        fontWeight="bold"
-                        textAnchor="middle"
-                      >
-                        {building.shortCode}
+                        {building.totalFloors} {building.totalFloors === 1 ? "Level" : "Levels"} • {building.shortCode}
                       </text>
                     </g>
                   );
@@ -273,9 +389,9 @@ export default function CampusMapPage() {
               </svg>
             </div>
 
-            {/* Building Grid Cards */}
+            {/* Quick Building Directory Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-4">
-              {CAMPUS_BUILDINGS.map((b) => {
+              {visibleBuildings.map((b) => {
                 const isSelected = selectedBuildingId === b.id;
                 return (
                   <button
@@ -283,10 +399,11 @@ export default function CampusMapPage() {
                     onClick={() => {
                       setSelectedBuildingId(b.id);
                       setSelectedFloor("all");
+                      setActiveLandmark(null);
                     }}
                     className={`p-3 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? "bg-blue-50/70 dark:bg-blue-950/40 border-blue-500 dark:border-blue-500 shadow-sm"
+                        ? "bg-blue-50/80 dark:bg-blue-950/50 border-blue-500 dark:border-blue-500 shadow-sm"
                         : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                     }`}
                   >
@@ -308,71 +425,96 @@ export default function CampusMapPage() {
             </div>
           </div>
 
-          {/* Active Building Deep-Dive Panel */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div>
+          {/* Active Landmark or Active Building Deep-Dive Panel */}
+          {activeLandmark ? (
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: selectedBuilding.color }}
-                  />
-                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
-                    {selectedBuilding.name}
-                  </h2>
+                  <MapPin className="w-4 h-4 text-blue-500" />
+                  <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
+                    {activeLandmark.name}
+                  </h3>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {selectedBuilding.description}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                 <button
-                  onClick={() => setSelectedFloor("all")}
-                  className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${
-                    selectedFloor === "all"
-                      ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
+                  onClick={() => setActiveLandmark(null)}
+                  className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >
-                  All Floors
+                  Dismiss
                 </button>
-                {selectedBuilding.floors.map((fl) => (
-                  <button
-                    key={fl}
-                    onClick={() => setSelectedFloor(fl)}
-                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
-                      selectedFloor === fl
-                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    {fl === 0 ? "G" : `L${fl}`}
-                  </button>
-                ))}
               </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                {activeLandmark.description}
+              </p>
             </div>
+          ) : (
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3.5 h-3.5 rounded-full"
+                      style={{ backgroundColor: selectedBuilding.color }}
+                    />
+                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
+                      {selectedBuilding.name}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {selectedBuilding.description}
+                  </p>
+                </div>
 
-            {/* Key Landmarks in Building */}
-            <div>
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Key Facilities & Landmarks:
-              </span>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {selectedBuilding.keyLandmarks.map((lm) => (
-                  <span
-                    key={lm}
-                    className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
-                  >
-                    📍 {lm}
-                  </span>
-                ))}
+                {/* Level / Floor Selector */}
+                {selectedBuilding.floors.length > 1 && (
+                  <div className="flex items-center gap-1 shrink-0 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                    <button
+                      onClick={() => setSelectedFloor("all")}
+                      className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${
+                        selectedFloor === "all"
+                          ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      All Levels
+                    </button>
+                    {selectedBuilding.floors.map((fl) => (
+                      <button
+                        key={fl}
+                        onClick={() => setSelectedFloor(fl)}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                          selectedFloor === fl
+                            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        L{fl}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Key Landmarks in Building */}
+              <div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Key Facilities & Landmarks:
+                </span>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {selectedBuilding.keyLandmarks.map((lm) => (
+                    <span
+                      key={lm}
+                      className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
+                    >
+                      📍 {lm}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Right Column: Room Matrix & Turn-by-Turn Walking Directions */}
+        {/* Right Column: Room Finder, Faculty Cabins & Turn-by-Turn Walking Directions */}
         <div className="lg:col-span-5 space-y-6">
           {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
@@ -438,14 +580,14 @@ export default function CampusMapPage() {
                             {catInfo.label}
                           </span>
                           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            {bldg?.shortCode} • {room.floor === 0 ? "Ground Floor" : `Floor ${room.floor}`}
+                            {bldg?.shortCode} • Level {room.floor}
                           </span>
                         </div>
                         <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 mt-1.5">
                           {room.name}
                         </h3>
                         <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-semibold mt-0.5">
-                          Room #{room.roomNumber}
+                          Location: {room.roomNumber}
                         </div>
                       </div>
 
@@ -491,7 +633,7 @@ export default function CampusMapPage() {
                     {activeRoom.name}
                   </h3>
                   <div className="text-xs text-blue-200 mt-0.5 font-mono">
-                    Target: {activeRoom.roomNumber} ({activeRoom.floor === 0 ? "Ground Floor" : `Floor ${activeRoom.floor}`})
+                    Room: {activeRoom.roomNumber} (Level {activeRoom.floor})
                   </div>
                 </div>
 
@@ -531,7 +673,7 @@ export default function CampusMapPage() {
               <div className="flex items-center gap-2 pt-2">
                 <button
                   onClick={() => handleCopyDirections(activeRoom.directions)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-md"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-md cursor-pointer"
                 >
                   {copiedDirection ? (
                     <>
