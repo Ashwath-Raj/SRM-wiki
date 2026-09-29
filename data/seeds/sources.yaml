@@ -1,0 +1,160 @@
+sources:
+  - id: "src-official-main"
+    name: "SRM University-AP Official Portal"
+    base_url: "https://srmap.edu.in"
+    source_type: "OFFICIAL"
+    description: "Main institutional website of SRM University-AP Andhra Pradesh."
+    crawl_enabled: true
+    crawl_frequency: "HOURLY"
+    allowed_paths:
+      - "/"
+      - "/news"
+      - "/announcements"
+      - "/events"
+      - "/circulars"
+    blocked_paths:
+      - "/admin"
+      - "/login"
+      - "/wp-admin"
+    verification_status: "VERIFIED"
+
+  - id: "src-official-exam"
+    name: "SRM AP Examination Portal"
+    base_url: "https://srmap.edu.in/examination"
+    source_type: "OFFICIAL"
+    description: "Official portal for examination schedules, results, hall tickets, and re-evaluation circulars."
+    crawl_enabled: true
+    crawl_frequency: "HOURLY"
+    allowed_paths:
+      - "/examination"
+      - "/examination/schedules"
+      - "/examination/circulars"
+      - "/examination/results"
+    blocked_paths:
+      - "/examination/internal"
+    verification_status: "VERIFIED"
+
+  - id: "src-official-library"
+    name: "SRM AP Central Library"
+    base_url: "https://srmap.edu.in/library"
+    source_type: "OFFICIAL"
+    description: "Central library OPAC catalog, digital databases (IEEE, Springer, ACM), working hours, and book reservations."
+    crawl_enabled: true
+    crawl_frequency: "DAILY"
+    allowed_paths:
+      - "/library"
+      - "/library/resources"
+      - "/library/rules"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-official-lms"
+    name: "SRM AP Canvas / LMS Portal"
+    base_url: "https://srmap.instructure.com"
+    source_type: "OFFICIAL"
+    description: "Institutional Learning Management System (LMS) for course materials, assignments, and quizzes."
+    crawl_enabled: false
+    crawl_frequency: "MANUAL"
+    allowed_paths:
+      - "/login"
+    blocked_paths:
+      - "/courses/*"
+      - "/users/*"
+    verification_status: "VERIFIED"
+
+  - id: "src-official-cdc"
+    name: "Career Development Centre (CDC)"
+    base_url: "https://srmap.edu.in/cdc"
+    source_type: "OFFICIAL"
+    description: "Campus placements, internships, placement statistics, and training workshops."
+    crawl_enabled: true
+    crawl_frequency: "DAILY"
+    allowed_paths:
+      - "/cdc"
+      - "/cdc/placements"
+      - "/cdc/internships"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-official-dsa"
+    name: "Directorate of Student Affairs (DSA)"
+    base_url: "https://srmap.edu.in/student-affairs"
+    source_type: "OFFICIAL"
+    description: "Student clubs, societies, cultural fests (Milan, Infinitus), sports, hostel guidelines, and student grievance cell."
+    crawl_enabled: true
+    crawl_frequency: "DAILY"
+    allowed_paths:
+      - "/student-affairs"
+      - "/student-affairs/clubs"
+      - "/student-affairs/hostels"
+      - "/student-affairs/anti-ragging"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-dept-cse"
+    name: "Department of Computer Science & Engineering"
+    base_url: "https://srmap.edu.in/seas/cse"
+    source_type: "DEPARTMENT"
+    description: "Faculty directory, curriculum regulations, research labs, and departmental announcements."
+    crawl_enabled: true
+    crawl_frequency: "WEEKLY"
+    allowed_paths:
+      - "/seas/cse"
+      - "/seas/cse/faculty"
+      - "/seas/cse/research"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-dept-ece"
+    name: "Department of Electronics & Communication Engineering"
+    base_url: "https://srmap.edu.in/seas/ece"
+    source_type: "DEPARTMENT"
+    description: "ECE curriculum, VLSI and IoT labs, faculty publications, and student seminars."
+    crawl_enabled: true
+    crawl_frequency: "WEEKLY"
+    allowed_paths:
+      - "/seas/ece"
+      - "/seas/ece/faculty"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-org-nexttech"
+    name: "Next Tech Lab"
+    base_url: "https://nexttechlab.io"
+    source_type: "ORGANIZATION"
+    description: "Student-run multidisciplinary innovation and research lab comprising Pausch, Turing, Satoshi, and Tesla labs."
+    crawl_enabled: true
+    crawl_frequency: "WEEKLY"
+    allowed_paths:
+      - "/"
+      - "/projects"
+      - "/members"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-org-acm"
+    name: "SRM AP ACM Student Chapter"
+    base_url: "https://srmap.acm.org"
+    source_type: "ORGANIZATION"
+    description: "ACM student branch organizing coding competitions, hackathons, and technical talk series."
+    crawl_enabled: true
+    crawl_frequency: "WEEKLY"
+    allowed_paths:
+      - "/"
+      - "/events"
+      - "/hackathons"
+    blocked_paths: []
+    verification_status: "VERIFIED"
+
+  - id: "src-org-gdg"
+    name: "GDG on Campus SRM AP"
+    base_url: "https://gdg.community.dev/gdg-on-campus-srm-university-ap"
+    source_type: "ORGANIZATION"
+    description: "Google Developer Groups student community hosting Android, Cloud, AI/ML, and Web development workshops."
+    crawl_enabled: true
+    crawl_frequency: "WEEKLY"
+    allowed_paths:
+      - "/"
+      - "/events"
+    blocked_paths: []
+    verification_status: "VERIFIED"
